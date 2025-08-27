@@ -1,0 +1,58 @@
+<div class="relative inline-block" #container>
+  <!-- SVG связи -->
+  <svg class="absolute top-0 left-0 pointer-events-none w-full h-full">
+    <!-- *ngFor="let c of connections()" -->
+    @for (c of connections(); track c.from.x) {
+    <path
+      [attr.d]="
+        'M ' +
+        c.from.right +
+        ',' +
+        (c.from.top + c.from.height / 2) +
+        ' C ' +
+        (c.from.right + 50) +
+        ',' +
+        (c.from.top + c.from.height / 2) +
+        ' ' +
+        (c.to.left - 50) +
+        ',' +
+        (c.to.top + c.to.height / 2) +
+        ' ' +
+        c.to.left +
+        ',' +
+        (c.to.top + c.to.height / 2)
+      "
+      stroke="black"
+      fill="transparent"
+    />
+    }
+  </svg>
+
+  <!-- Сетка -->
+  <div
+    class="gantt"
+    [style.display]="'grid'"
+    [style.gridTemplateColumns]="'repeat(' + days().length + ', ' + dayWidth + 'px)'"
+  >
+    <!-- Шапка -->
+    <!-- *ngFor="let d of days(); let i = index" -->
+    @for (d of days(); track $index) {
+    <div class="border text-xs text-center">
+      {{ d.getDate() }}
+    </div>
+    }
+
+    <!-- Задачи -->
+    <!-- *ngFor="let bar of bars(); trackBy: trackById" -->
+    @for (bar of bars(); track bar.id) {
+    <div
+      class="task text-white rounded px-2 flex items-center"
+      style="background: steelblue; grid-row: span 1"
+      [style.gridColumn]="bar.colStart + ' / ' + bar.colEnd"
+      #taskRef
+    >
+      {{ bar.name }}
+    </div>
+    }
+  </div>
+</div>

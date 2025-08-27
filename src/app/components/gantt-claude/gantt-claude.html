@@ -1,0 +1,84 @@
+<div class="gantt-container">
+  <div class="gantt-header">
+    <div class="task-names-header">Задачи</div>
+    <div class="timeline-header">
+      <!-- *ngFor="let unit of timeline" -->
+      @for(unit of timeline; track $index) {
+      <div class="timeline-unit" [class.weekend]="unit.isWeekend" [style.width.px]="dayWidth">
+        {{ unit.label }}
+      </div>
+      }
+    </div>
+  </div>
+
+  <div class="gantt-body">
+    <div class="tasks-section">
+      <!-- *ngFor="let task of tasks; trackBy: trackByTaskId" -->
+      @for (task of tasks; track task.id) {
+      <div class="task-row" [style.height.px]="rowHeight">
+        <div class="task-name">{{ task.name }}</div>
+      </div>
+      }
+    </div>
+
+    <div class="chart-section" #chartSection>
+      <!-- Сетка временной шкалы -->
+      <div class="timeline-grid">
+        <!-- *ngFor="let unit of timeline" -->
+        @for (unit of timeline; track $index) {
+        <div class="grid-line" [class.weekend]="unit.isWeekend" [style.width.px]="dayWidth"></div>
+        }
+      </div>
+
+      <!-- Полосы задач -->
+      <div class="tasks-bars">
+        <div
+          *ngFor="let task of tasks; let i = index; trackBy: trackByTaskId"
+          class="task-bar-container"
+          [style.height.px]="rowHeight"
+          [style.top.px]="i * rowHeight"
+        >
+          <div
+            class="task-bar"
+            [style.left.px]="getTaskLeft(task)"
+            [style.width.px]="getTaskWidth(task)"
+            [style.background-color]="task.color || '#4CAF50'"
+          >
+            <div class="task-progress" [style.width.%]="task.progress"></div>
+
+            <span class="task-bar-label">{{ task.progress }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SVG для соединительных линий -->
+      <svg class="dependencies-svg" [attr.width]="chartWidth" [attr.height]="chartHeight">
+        <defs>
+          <marker
+            id="arrowhead"
+            markerWidth="10"
+            markerHeight="7"
+            refX="10"
+            refY="3.5"
+            orient="auto"
+          >
+            <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
+          </marker>
+        </defs>
+
+        <!-- *ngFor="let connection of connections" -->
+        @for (connection of connections; track $index) {
+        <g>
+          <path
+            [attr.d]="connection.path"
+            stroke="#666"
+            stroke-width="2"
+            fill="none"
+            marker-end="url(#arrowhead)"
+          ></path>
+        </g>
+        }
+      </svg>
+    </div>
+  </div>
+</div>

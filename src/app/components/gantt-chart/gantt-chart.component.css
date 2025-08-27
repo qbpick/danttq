@@ -1,0 +1,11 @@
+.gantt {
+  border: 1px solid #ccc;
+  grid-auto-rows: 40px;
+}
+.task {
+  margin: 4px;
+  height: 28px;
+}
+.absolute {
+  position: absolute;
+}
