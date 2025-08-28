@@ -32,8 +32,9 @@
 
       <!-- Полосы задач -->
       <div class="tasks-bars">
+        <!-- *ngFor="let task of tasks; let i = index; trackBy: trackByTaskId" -->
+        @for (task of tasks; i = $index; track task.id) {
         <div
-          *ngFor="let task of tasks; let i = index; trackBy: trackByTaskId"
           class="task-bar-container"
           [style.height.px]="rowHeight"
           [style.top.px]="i * rowHeight"
@@ -49,6 +50,7 @@
             <span class="task-bar-label">{{ task.progress }}%</span>
           </div>
         </div>
+        }
       </div>
 
       <!-- SVG для соединительных линий -->

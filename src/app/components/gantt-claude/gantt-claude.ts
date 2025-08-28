@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 
-interface Task {
+type Task = {
   id: string;
   name: string;
   startDate: Date;
@@ -9,23 +9,27 @@ interface Task {
   progress: number; // 0-100
   dependencies: string[]; // ID задач, от которых зависит текущая задача | подумать над названием
   color?: string;
-}
+};
 
+type TaskKind = 'project' | 'task';
 
-interface TimelineUnit {
+const taskKinds: Record<TaskKind, string> = { project: '#color', task: '#color' };
+
+type TimelineUnit = {
   date: Date;
   label: string;
   isWeekend?: boolean;
-}
+};
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-gantt-claude',
   imports: [CommonModule],
   templateUrl: './gantt-claude.html',
   styleUrl: './gantt-claude.css',
 })
 export class GanttClaude implements OnInit {
-  // TODO: поменять структуру - убрать color в отдельный (в будущем параметр) типа {taskId: string, color: string}
+  // TODO: поменять структуру - убрать color в отдельный
   tasks: Task[] = [
     {
       id: '1',
@@ -66,7 +70,7 @@ export class GanttClaude implements OnInit {
     {
       id: '5',
       name: 'Разработка Backend',
-      startDate: new Date('2025-01-26'),
+      startDate: new Date('2025-01-29'),
       endDate: new Date('2025-02-15'),
       progress: 30,
       dependencies: ['3'],
