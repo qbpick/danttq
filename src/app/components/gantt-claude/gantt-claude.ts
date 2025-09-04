@@ -1,5 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  OnInit,
+  signal,
+  viewChild,
+  ViewChild,
+} from '@angular/core';
 
 type Task = {
   id: string;
@@ -29,6 +38,9 @@ type TimelineUnit = {
   styleUrl: './gantt-claude.css',
 })
 export class GanttClaude implements OnInit {
+  timelineHeader = viewChild.required<ElementRef>('timelineHeader');
+  chartSection = viewChild.required<ElementRef>('chartSection');
+
   // TODO: поменять структуру - убрать color в отдельный
   tasks: Task[] = [
     {
@@ -96,6 +108,8 @@ export class GanttClaude implements OnInit {
     },
   ];
 
+  taskIdMap = computed(() => new Map(this.tasks.map((t) => [t.id, t])));
+
   timeline: TimelineUnit[] = [];
   connections: { path: string }[] = [];
 
@@ -142,8 +156,11 @@ export class GanttClaude implements OnInit {
   private generateConnections() {
     this.connections = [];
 
-    this.tasks.forEach((task, taskIndex) => {
-      task.dependencies.forEach((depId) => {
+    for (const [taskIndex, task] of this.tasks.entries()) {
+      for (const depId of task.dependencies) {
+        if (!this.taskIdMap().has(depId)) {
+          continue;
+        }
         const depTask = this.tasks.find((t) => t.id === depId);
         const depIndex = this.tasks.findIndex((t) => t.id === depId);
 
@@ -156,15 +173,15 @@ export class GanttClaude implements OnInit {
           // Создаем L-образную линию
           const midX = startX + (endX - startX) / 2;
 
-          const path = `M ${startX} ${startY}
-                       L ${midX} ${startY}
-                       L ${midX} ${endY}
-                       L ${endX - 5} ${endY}`;
+          const path = `M ${startX},${startY}
+                       L ${midX},${startY}
+                       L ${midX},${endY}
+                       L ${endX - 5},${endY}`;
 
           this.connections.push({ path });
         }
-      });
-    });
+      }
+    }
   }
 
   getTaskLeft(task: Task): number {
@@ -180,7 +197,9 @@ export class GanttClaude implements OnInit {
     return Math.max(20, diffDays * this.dayWidth);
   }
 
-  trackByTaskId(index: number, task: Task): string {
-    return task.id;
+  onTimelineScroll(event: Event) {
+    const t = event.target as HTMLElement;
+    this.timelineHeader().nativeElement.scrollTo({ left: t.scrollLeft, behavior: 'instant' });
+    this.chartSection().nativeElement.scrollTo({ left: t.scrollLeft, behavior: 'instant' });
   }
 }

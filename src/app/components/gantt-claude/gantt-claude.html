@@ -1,10 +1,17 @@
 <div class="gantt-container">
   <div class="gantt-header">
-    <div class="task-names-header">Задачи</div>
-    <div class="timeline-header">
+    <div class="task-names-header">
+      <div class="task-name">Задачи</div>
+    </div>
+    <div class="timeline-header" #timelineHeader (scroll)="onTimelineScroll($event)">
       <!-- *ngFor="let unit of timeline" -->
       @for(unit of timeline; track $index) {
-      <div class="timeline-unit" [class.weekend]="unit.isWeekend" [style.width.px]="dayWidth">
+      <div
+        class="timeline-unit"
+        [class.weekend]="unit.isWeekend"
+        [style.min-width.px]="dayWidth"
+        [style.width.px]="dayWidth"
+      >
         {{ unit.label }}
       </div>
       }
@@ -21,7 +28,7 @@
       }
     </div>
 
-    <div class="chart-section" #chartSection>
+    <div class="chart-section" #chartSection (scroll)="onTimelineScroll($event)">
       <!-- Сетка временной шкалы -->
       <div class="timeline-grid">
         <!-- *ngFor="let unit of timeline" -->
@@ -33,7 +40,7 @@
       <!-- Полосы задач -->
       <div class="tasks-bars">
         <!-- *ngFor="let task of tasks; let i = index; trackBy: trackByTaskId" -->
-        @for (task of tasks; i = $index; track task.id) {
+        @for (task of tasks; let i = $index; track task.id;) {
         <div
           class="task-bar-container"
           [style.height.px]="rowHeight"
@@ -64,7 +71,7 @@
             refY="3.5"
             orient="auto"
           >
-            <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
+            <polygon points="0 0, 10 3.5, 0 7" fill="currentColor" />
           </marker>
         </defs>
 
