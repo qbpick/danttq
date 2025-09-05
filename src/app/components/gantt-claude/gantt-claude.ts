@@ -7,7 +7,6 @@ import {
   OnInit,
   signal,
   viewChild,
-  ViewChild,
 } from '@angular/core';
 
 type Task = {
@@ -17,7 +16,7 @@ type Task = {
   endDate: Date;
   progress: number; // 0-100
   dependencies: string[]; // ID задач, от которых зависит текущая задача | подумать над названием
-  color?: string;
+  color: string;
 };
 
 type TaskKind = 'project' | 'task';
@@ -28,6 +27,16 @@ type TimelineUnit = {
   date: Date;
   label: string;
   isWeekend?: boolean;
+};
+
+type Connection = {
+  path: string;
+  gradient: ConnectionGradient;
+};
+
+type ConnectionGradient = {
+  startColor: string;
+  endColor: string;
 };
 
 @Component({
@@ -41,7 +50,7 @@ export class GanttClaude implements OnInit {
   timelineHeader = viewChild.required<ElementRef>('timelineHeader');
   chartSection = viewChild.required<ElementRef>('chartSection');
 
-  // TODO: поменять структуру - убрать color в отдельный
+  // TODO: to signal()
   tasks: Task[] = [
     {
       id: '1',
@@ -111,12 +120,15 @@ export class GanttClaude implements OnInit {
   taskIdMap = computed(() => new Map(this.tasks.map((t) => [t.id, t])));
 
   timeline: TimelineUnit[] = [];
-  connections: { path: string }[] = [];
+  connections: Connection[] = [];
 
   dayWidth = 40;
   rowHeight = 50;
   chartWidth = 0;
   chartHeight = 0;
+
+  // Вынести в константы
+  private readonly ONE_DAY = 1000 * 60 * 60 * 24;
 
   ngOnInit() {
     this.generateTimeline();
@@ -153,7 +165,10 @@ export class GanttClaude implements OnInit {
     this.chartHeight = this.tasks.length * this.rowHeight;
   }
 
+  // computed от this.tasks
   private generateConnections() {
+    const CORNER_RADIUS = 10;
+    const MARKER_WIDTH = 5;
     this.connections = [];
 
     for (const [taskIndex, task] of this.tasks.entries()) {
@@ -161,6 +176,7 @@ export class GanttClaude implements OnInit {
         if (!this.taskIdMap().has(depId)) {
           continue;
         }
+
         const depTask = this.tasks.find((t) => t.id === depId);
         const depIndex = this.tasks.findIndex((t) => t.id === depId);
 
@@ -178,22 +194,40 @@ export class GanttClaude implements OnInit {
                        L ${midX},${endY}
                        L ${endX - 5},${endY}`;
 
-          this.connections.push({ path });
+          // const path = `
+          //         M ${startX},${startY}
+          //         L ${midX - safeRadius},${startY}
+          //         A ${safeRadius} ${safeRadius} 0 0 1 ${midX} ${startY + safeRadius}
+          //         L ${midX},${endY - safeRadius}
+          //         A ${safeRadius} ${safeRadius} 0 0 1 ${midX + safeRadius} ${endY}
+          //         L ${endX - 5},${endY}
+          //         `;
+
+          // const gradient = `linear-gradient(to right, ${depTask.color}, ${task.color})`;
+          const gradient = { startColor: depTask.color, endColor: task.color };
+
+          this.connections.push({ path, gradient });
         }
       }
     }
   }
 
+  getConnectionPathStyle({ startColor, endColor }: ConnectionGradient): string {
+    return `--start-color: ${startColor}; --end-color: ${endColor}`;
+    //  [style]="'--start-color: ' + connection.gradient.startColor +
+    //               '; --end-color: ' + connection.gradient.endColor"
+  }
+
   getTaskLeft(task: Task): number {
     const startDate = this.timeline[0].date;
     const diffTime = task.startDate.getTime() - startDate.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(diffTime / this.ONE_DAY);
     return Math.max(0, diffDays * this.dayWidth);
   }
 
   getTaskWidth(task: Task): number {
     const diffTime = task.endDate.getTime() - task.startDate.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    const diffDays = Math.ceil(diffTime / this.ONE_DAY) + 1;
     return Math.max(20, diffDays * this.dayWidth);
   }
 

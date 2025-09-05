@@ -63,15 +63,20 @@
       <!-- SVG для соединительных линий -->
       <svg class="dependencies-svg" [attr.width]="chartWidth" [attr.height]="chartHeight">
         <defs>
+          <linearGradient id="line-gradient-template" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="var(--start-color)" />
+            <stop offset="100%" stop-color="var(--end-color)" />
+          </linearGradient>
           <marker
             id="arrowhead"
-            markerWidth="10"
-            markerHeight="7"
-            refX="10"
-            refY="3.5"
-            orient="auto"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto-start-reverse"
           >
-            <polygon points="0 0, 10 3.5, 0 7" fill="currentColor" />
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
           </marker>
         </defs>
 
@@ -79,11 +84,11 @@
         @for (connection of connections; track $index) {
         <g>
           <path
+            [style]="getConnectionPathStyle(connection.gradient)"
             [attr.d]="connection.path"
-            stroke="#666"
-            stroke-width="2"
-            fill="none"
+            stroke="url(#line-gradient-template)"
             marker-end="url(#arrowhead)"
+            fill="none"
           ></path>
         </g>
         }

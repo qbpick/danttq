@@ -124,6 +124,7 @@
 }
 
 .task-bar {
+  will-change: left, width;
   position: relative;
   height: 24px;
   border-radius: 12px;
@@ -156,6 +157,12 @@
   left: 0;
   z-index: 3;
   pointer-events: none;
+}
+
+.dependencies-svg path {
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* Адаптивность */
